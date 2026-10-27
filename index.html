@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e3a8a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SPORT QN">
+<title>SPORT QUẢNG NINH 1984</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/app-192.png">
+<link rel="apple-touch-icon" href="icons/app-192.png">
+<style>
+  html,body{margin:0;height:100%;background:#1e3a8a;overflow:hidden;}
+  #app{position:fixed;inset:0;width:100%;height:100%;border:0;display:block;background:#fff;}
+  #load{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;font:600 16px system-ui,sans-serif;text-align:center;padding:20px;background:#1e3a8a;z-index:4;}
+  #load img{width:96px;height:96px;border-radius:22px;box-shadow:0 6px 20px rgba(0,0,0,.35);}
+  #tip{position:fixed;left:8px;right:8px;bottom:8px;z-index:5;display:none;background:#111827;color:#fff;border-radius:12px;padding:10px 40px 10px 12px;font:600 14px/1.35 system-ui,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.35);}
+  #tip b{color:#fde047;} #tip .x{position:absolute;right:6px;top:6px;border:0;background:none;color:#fff;font-size:20px;}
+  #fs{display:none;margin-top:8px;border:0;border-radius:10px;padding:8px 14px;background:#fde047;color:#111827;font:800 14px system-ui,sans-serif;}
+</style>
+</head>
+<body>
+<div id="load"><img src="icons/app-192.png" alt=""><div>Đang mở SPORT QUẢNG NINH 1984…</div></div>
+<iframe id="app" title="SPORT QUẢNG NINH 1984" allow="fullscreen; screen-wake-lock; clipboard-read; clipboard-write; autoplay; camera; geolocation" allowfullscreen></iframe>
+<div id="tip"><button class="x" type="button" aria-label="Đóng" onclick="this.parentNode.style.display='none'">✕</button>
+  Để mở <b>full màn hình</b> như app: bấm <b>⋮</b> (góc trên Chrome) › <b>Cài đặt ứng dụng</b> / <b>Thêm vào màn hình chính</b>, rồi mở bằng biểu tượng <b>SPORT QN</b>.
+  <br><small>iPhone: mở bằng Safari › nút Chia sẻ › Thêm vào MH chính.</small><br><button id="fs" type="button">⛶ Toàn màn hình ngay (lần này)</button></div>
+<script src="config.js"></script>
+<script>
+(function () {
+  var url = String(window.APP_URL || '').split('?')[0];
+  var load = document.getElementById('load'), fr = document.getElementById('app');
+  if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) {
+    load.innerHTML = '<div>⚠ Chưa dán link ứng dụng.<br><small>Mở file <b>config.js</b>, dán link /exec của Apps Script vào dòng APP_URL rồi tải lại.</small></div>'; return;
+  }
+  // 1 LINK DUY NHẤT: mặc định mở trang khán giả; trọng tài bấm "Dành cho trọng tài" trong app -> vỏ app chuyển sang chế độ trọng tài.
+  // Giữ tham số người dùng thêm vào link (vd ?register=1). KHÔNG có sẵn đường vào trang điều hành (admin dùng link bí mật riêng).
+  function open(q) { load.style.display = 'flex'; fr.src = url + (q ? '?' + q : ''); }
+  var q0 = location.search.replace(/^\?/, ''); try { if (sessionStorage.getItem('sqnMode') === 'trongtai' && !q0) q0 = 'trongtai'; } catch (e) {}
+  open(q0);
+  fr.addEventListener('load', function () { load.style.display = 'none'; });
+  setTimeout(function () { load.style.display = 'none'; }, 15000);
+  window.addEventListener('message', function (ev) {
+    var d = ev && ev.data; if (!d || !d.sqnGo) return;
+    if (d.sqnGo === 'trongtai') { try { sessionStorage.setItem('sqnMode', 'trongtai'); } catch (e) {} open('trongtai'); }
+    else if (d.sqnGo === 'xem') { try { sessionStorage.removeItem('sqnMode'); } catch (e) {} open(''); }
+  });
+  var asApp = window.matchMedia('(display-mode: fullscreen)').matches || window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (!asApp) document.getElementById('tip').style.display = 'block';
+  var fsb = document.getElementById('fs'), el = document.documentElement;
+  if (!asApp && el.requestFullscreen) { fsb.style.display = 'inline-block';
+    fsb.onclick = function () { el.requestFullscreen().then(function () { document.getElementById('tip').style.display = 'none'; }).catch(function () {}); }; }
+  var wl = null; function awake() { try { if (navigator.wakeLock && !wl && !document.hidden) navigator.wakeLock.request('screen').then(function (w) { wl = w; w.addEventListener('release', function () { wl = null; }); }).catch(function () {}); } catch (e) {} }
+  awake(); document.addEventListener('visibilitychange', awake); document.addEventListener('click', awake, { once: true });
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+})();
+</script>
+</body>
+</html>
